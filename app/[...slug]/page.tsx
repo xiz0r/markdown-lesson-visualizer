@@ -10,6 +10,11 @@ interface PageProps {
   params: Promise<{ slug: string[] }>;
 }
 
+// Generate a slug ID from text for anchor links
+function generateSlugId(text: string): string {
+  return text.toLowerCase().replace(/[^\w]+/g, '-');
+}
+
 // Extract headings from markdown for TOC
 function extractHeadings(content: string): { id: string; text: string; level: number }[] {
   const headingRegex = /^(#{1,3})\s+(.+)$/gm;
@@ -19,8 +24,7 @@ function extractHeadings(content: string): { id: string; text: string; level: nu
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
-    const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-    headings.push({ id, text, level });
+    headings.push({ id: generateSlugId(text), text, level });
   }
 
   return headings;
@@ -121,7 +125,7 @@ export default async function LessonPage({ params }: PageProps) {
               components={{
                 h1: ({ children, ...props }) => {
                   const text = String(children);
-                  const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+                  const id = generateSlugId(text);
                   return (
                     <h1 
                       id={id}
@@ -134,7 +138,7 @@ export default async function LessonPage({ params }: PageProps) {
                 },
                 h2: ({ children, ...props }) => {
                   const text = String(children);
-                  const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+                  const id = generateSlugId(text);
                   return (
                     <h2 
                       id={id}
@@ -147,7 +151,7 @@ export default async function LessonPage({ params }: PageProps) {
                 },
                 h3: ({ children, ...props }) => {
                   const text = String(children);
-                  const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+                  const id = generateSlugId(text);
                   return (
                     <h3 
                       id={id}
@@ -191,7 +195,7 @@ export default async function LessonPage({ params }: PageProps) {
                     {children}
                   </blockquote>
                 ),
-                code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'> & { className?: string }) => {
+                code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'>) => {
                   const match = /language-(\w+)/.exec(className || '');
                   const isInline = !match && !String(children).includes('\n');
                   
