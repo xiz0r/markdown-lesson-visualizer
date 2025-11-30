@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { notFound } from 'next/navigation';
 
 import { CONTENT_ROOT } from '@/lib/content';
+import ContentWrapper from '@/components/ContentWrapper';
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;
@@ -49,10 +50,11 @@ export default async function LessonPage({ params }: PageProps) {
   const fileName = path.basename(relativePath, '.md');
 
   return (
-    <div className="max-w-7xl mx-auto p-8 pb-32">
+    <ContentWrapper>
+      <div className="max-w-7xl mx-auto p-8 pb-32">
       {/* Page header */}
       <div
-        className="mb-8 pb-6 animate-fade-in"
+        className="mb-8 pb-6"
         style={{ borderBottom: '1px solid var(--cyber-border)' }}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -74,7 +76,7 @@ export default async function LessonPage({ params }: PageProps) {
 
       {videoExists && (
         <div
-          className="mb-8 rounded-xl overflow-hidden aspect-video animate-fade-in delay-1"
+          className="mb-8 rounded-xl overflow-hidden aspect-video"
           style={{
             background: 'var(--cyber-void)',
             border: '1px solid var(--cyber-border)',
@@ -94,7 +96,7 @@ export default async function LessonPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto animate-fade-in delay-2">
+      <div className="max-w-4xl mx-auto">
         <ReactMarkdown
           components={{
             h1: ({ node, ...props }) => (
@@ -344,5 +346,6 @@ export default async function LessonPage({ params }: PageProps) {
         {'// end of module'}
       </div>
     </div>
+    </ContentWrapper>
   );
 }
