@@ -3,22 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, ChevronDown, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, FileCode, FolderOpen, Folder, Terminal } from 'lucide-react';
 import clsx from 'clsx';
 
 import { ContentNode } from '@/lib/content';
 
 const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const pathname = usePathname();
-
-  // Construct the URL path for the link
-  // We need to encode the path components to handle spaces and special chars
-  // The path from API is relative to content root, e.g. "teacher/chapter/lesson.md"
-  // We want to link to "/teacher/chapter/lesson" (without extension if possible, or handle in page)
-  // Let's keep it simple: link to the full path and handle it in the page slug.
-  // But wait, the slug in Next.js will be an array.
-  // If path is "cbs/Chapter 1/Lesson.md", we want the URL to be "/cbs/Chapter%201/Lesson.md"
 
   const href = `/${item.path.split('/').map(encodeURIComponent).join('/')}`;
   const isActive = pathname === href;
@@ -31,26 +24,64 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
   }, [pathname, href, item.type]);
 
   if (item.type === 'directory') {
+    const isTopLevel = level === 0;
+
     return (
       <div className="select-none">
         <div
           className={clsx(
-            "flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-zinc-800 transition-colors text-sm font-medium text-zinc-300",
-            level === 0 && "font-bold text-zinc-100 mt-4 uppercase tracking-wider text-xs"
+            "flex items-center gap-2 px-3 py-2 cursor-pointer transition-all duration-200 text-sm",
+            isTopLevel && "mt-6 first:mt-2"
           )}
-          style={{ paddingLeft: level === 0 ? '12px' : `${level * 12 + 12}px` }}
+          style={{
+            paddingLeft: isTopLevel ? '16px' : `${level * 16 + 16}px`,
+            background: isHovered ? 'var(--cyber-dark)' : 'transparent',
+            color: isTopLevel ? 'var(--cyber-cyan)' : 'var(--cyber-text-dim)',
+          }}
           onClick={() => setIsOpen(!isOpen)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
-          {level > 0 && (
-            <span className="text-zinc-500">
-              {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </span>
+          {isTopLevel ? (
+            <>
+              <span style={{ color: 'var(--cyber-text-muted)' }}>//</span>
+              <span
+                className="font-mono font-semibold uppercase tracking-[0.15em] text-xs"
+                style={{ color: 'var(--cyber-cyan)', textShadow: isHovered ? 'var(--glow-text)' : 'none' }}
+              >
+                {item.name}
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                className="transition-transform duration-200"
+                style={{
+                  color: isOpen ? 'var(--cyber-cyan)' : 'var(--cyber-text-muted)',
+                  transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}
+              >
+                <ChevronRight size={14} />
+              </span>
+              <span style={{ color: isOpen ? 'var(--cyber-cyan-dim)' : 'var(--cyber-text-muted)' }}>
+                {isOpen ? <FolderOpen size={14} /> : <Folder size={14} />}
+              </span>
+              <span
+                className="font-medium"
+                style={{ color: isHovered ? 'var(--cyber-text)' : 'var(--cyber-text-dim)' }}
+              >
+                {item.name}
+              </span>
+            </>
           )}
-          {/* {level > 0 && <Folder size={14} className="text-zinc-500" />} */}
-          <span className="">{item.name}</span>
         </div>
         {isOpen && item.children && (
-          <div>
+          <div
+            style={{
+              borderLeft: level > 0 ? '1px solid var(--cyber-border)' : 'none',
+              marginLeft: level > 0 ? `${level * 16 + 22}px` : '0',
+            }}
+          >
             {item.children.map((child) => (
               <SidebarItem key={child.path} item={child} level={level + 1} />
             ))}
@@ -60,8 +91,7 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
     );
   }
 
-  // It's a file
-  // Only show markdown files in the sidebar navigation
+  // It's a file - only show markdown files
   if (!item.name.endsWith('.md')) return null;
 
   const displayName = item.name.replace('.md', '');
@@ -70,58 +100,168 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
     <Link
       href={href}
       className={clsx(
-        "flex items-center gap-2 px-3 py-2 text-sm transition-colors border-l-2",
-        isActive
-          ? "bg-zinc-800/50 border-blue-500 text-blue-400"
-          : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30"
+        "flex items-center gap-2 px-3 py-2 text-sm transition-all duration-200 relative group"
       )}
-      style={{ paddingLeft: `${level * 12 + 12}px` }}
+      style={{
+        paddingLeft: `${level * 16 + 16}px`,
+        background: isActive ? 'linear-gradient(90deg, rgba(0, 240, 255, 0.1) 0%, transparent 100%)' : 'transparent',
+        borderLeft: isActive ? '2px solid var(--cyber-cyan)' : '2px solid transparent',
+        color: isActive ? 'var(--cyber-cyan)' : 'var(--cyber-text-dim)',
+        boxShadow: isActive ? 'inset 0 0 20px rgba(0, 240, 255, 0.05)' : 'none',
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = 'var(--cyber-dark)';
+          e.currentTarget.style.color = 'var(--cyber-text)';
+          e.currentTarget.style.borderLeftColor = 'var(--cyber-cyan-dim)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.color = 'var(--cyber-text-dim)';
+          e.currentTarget.style.borderLeftColor = 'transparent';
+        }
+      }}
     >
-      <FileText size={14} />
-      <span className="truncate">{displayName}</span>
+      <FileCode
+        size={14}
+        style={{ color: isActive ? 'var(--cyber-cyan)' : 'var(--cyber-text-muted)' }}
+      />
+      <span className="truncate font-mono text-xs">{displayName}</span>
+      {isActive && (
+        <span
+          className="ml-auto text-xs font-mono"
+          style={{ color: 'var(--cyber-cyan)', opacity: 0.6 }}
+        >
+          {'<'}
+        </span>
+      )}
     </Link>
   );
 };
 
 export default function Sidebar({ tree }: { tree: ContentNode[] }) {
-  const [width, setWidth] = useState(350);
+  const [width, setWidth] = useState(320);
   const isResized = useRef(false);
+
   useEffect(() => {
-
-    window.addEventListener("mousemove", (e) => {
-      if (!isResized.current) {
-        return;
-      }
-
-      setWidth((previousWidth) => previousWidth + e.movementX);
-    });
-
-    window.addEventListener("mouseup", () => {
-      isResized.current = false;
-    });
-
-    return () => {
-      window.removeEventListener("mousemove", () => { });
-      window.removeEventListener("mouseup", () => { });
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResized.current) return;
+      setWidth((previousWidth) => Math.max(240, Math.min(500, previousWidth + e.movementX)));
     };
 
+    const handleMouseUp = () => {
+      isResized.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
   }, []);
 
   return (
     <>
-
-      <div style={{ width: `${width / 16}rem` }} className="h-screen bg-zinc-950 border-r border-zinc-800 overflow-y-auto flex-shrink-0 flex flex-col">
-        <div className="p-4 border-b border-zinc-800 sticky top-0 bg-zinc-950 z-10">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            Learning Hub
-          </h1>
+      <div
+        style={{
+          width: `${width}px`,
+          background: 'linear-gradient(180deg, var(--cyber-deep) 0%, var(--cyber-void) 100%)',
+          borderRight: '1px solid var(--cyber-border)',
+        }}
+        className="h-screen overflow-y-auto flex-shrink-0 flex flex-col"
+      >
+        {/* Header */}
+        <div
+          className="p-4 sticky top-0 z-10"
+          style={{
+            background: 'linear-gradient(180deg, var(--cyber-deep) 0%, var(--cyber-deep) 80%, transparent 100%)',
+            borderBottom: '1px solid var(--cyber-border)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="p-2 rounded-lg"
+              style={{
+                background: 'var(--cyber-dark)',
+                border: '1px solid var(--cyber-border)',
+                boxShadow: 'var(--glow-sm)',
+              }}
+            >
+              <Terminal size={20} style={{ color: 'var(--cyber-cyan)' }} />
+            </div>
+            <div>
+              <h1
+                className="text-lg font-bold tracking-wide"
+                style={{
+                  fontFamily: 'var(--font-orbitron), sans-serif',
+                  color: 'var(--cyber-cyan)',
+                  textShadow: 'var(--glow-text)',
+                }}
+              >
+                LEARNING HUB
+              </h1>
+              <p
+                className="text-xs font-mono"
+                style={{ color: 'var(--cyber-text-muted)' }}
+              >
+                v2.0.0 // modules loaded
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="py-2">
+
+        {/* Navigation */}
+        <div className="py-2 flex-1">
           {tree.map((node) => (
             <SidebarItem key={node.path} item={node} />
           ))}
         </div>
+
+        {/* Footer */}
+        <div
+          className="p-4 font-mono text-xs"
+          style={{
+            borderTop: '1px solid var(--cyber-border)',
+            color: 'var(--cyber-text-muted)',
+            background: 'var(--cyber-void)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full pulse-glow"
+              style={{ background: 'var(--cyber-teal)', boxShadow: '0 0 8px var(--cyber-teal)' }}
+            />
+            <span>system.status: online</span>
+          </div>
+        </div>
       </div>
-      <div className="w-2 cursor-col-resize bg-zinc-500 " onMouseDown={() => isResized.current = true}></div></>
+
+      {/* Resize handle */}
+      <div
+        className="w-1 cursor-col-resize transition-colors duration-200 hover:w-1"
+        style={{
+          background: 'var(--cyber-border)',
+        }}
+        onMouseDown={() => {
+          isResized.current = true;
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'var(--cyber-cyan)';
+          e.currentTarget.style.boxShadow = 'var(--glow-sm)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'var(--cyber-border)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      />
+    </>
   );
 }

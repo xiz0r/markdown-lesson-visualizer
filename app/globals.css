@@ -1,26 +1,170 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cyber Color System */
+  --cyber-void: #03060a;
+  --cyber-deep: #080c14;
+  --cyber-dark: #0d1420;
+  --cyber-mid: #141e2c;
+  --cyber-light: #1c2a3a;
+
+  /* Accent Colors */
+  --cyber-cyan: #00f0ff;
+  --cyber-cyan-dim: #00b8c4;
+  --cyber-cyan-glow: rgba(0, 240, 255, 0.4);
+  --cyber-teal: #00d4aa;
+  --cyber-blue: #0088ff;
+  --cyber-purple: #8844ff;
+
+  /* Text Colors */
+  --cyber-text: #e4f4ff;
+  --cyber-text-dim: #8aa4b8;
+  --cyber-text-muted: #4a6478;
+
+  /* Borders */
+  --cyber-border: #1e3a4a;
+  --cyber-border-glow: #00f0ff33;
+
+  /* Glows */
+  --glow-sm: 0 0 10px var(--cyber-cyan-glow);
+  --glow-md: 0 0 20px var(--cyber-cyan-glow), 0 0 40px rgba(0, 240, 255, 0.15);
+  --glow-lg: 0 0 30px var(--cyber-cyan-glow), 0 0 60px rgba(0, 240, 255, 0.2), 0 0 100px rgba(0, 240, 255, 0.1);
+  --glow-text: 0 0 10px var(--cyber-cyan-glow), 0 0 20px rgba(0, 240, 255, 0.2);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--cyber-void);
+  --color-foreground: var(--cyber-text);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cyber-void);
+  color: var(--cyber-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Subtle animated grid background */
+.cyber-grid-bg {
+  background-image:
+    linear-gradient(var(--cyber-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-border) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: -1px -1px;
+}
+
+/* Scanline overlay effect */
+.scanlines::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  z-index: 9999;
+}
+
+/* Glow utilities */
+.cyber-glow {
+  box-shadow: var(--glow-sm);
+}
+
+.cyber-glow-md {
+  box-shadow: var(--glow-md);
+}
+
+.cyber-glow-lg {
+  box-shadow: var(--glow-lg);
+}
+
+.cyber-text-glow {
+  text-shadow: var(--glow-text);
+}
+
+/* Cyber border */
+.cyber-border {
+  border: 1px solid var(--cyber-border);
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.03);
+}
+
+.cyber-border-glow {
+  border: 1px solid var(--cyber-cyan);
+  box-shadow: var(--glow-sm), inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Subtle pulse animation */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Fade in animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Stagger delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cyber-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cyber-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyber-cyan-dim);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--cyber-cyan);
+  color: var(--cyber-void);
 }
