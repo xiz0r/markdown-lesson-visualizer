@@ -42,7 +42,7 @@ export default function Home() {
           className="font-mono text-sm tracking-[0.3em] uppercase"
           style={{ color: 'var(--cyber-text-muted)' }}
         >
-          // system.initialize
+          {'// system.initialize'}
         </span>
       </div>
 

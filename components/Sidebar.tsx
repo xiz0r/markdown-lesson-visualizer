@@ -3,24 +3,26 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, ChevronDown, FileCode, FolderOpen, Folder, Terminal } from 'lucide-react';
+import { ChevronRight, FileCode, FolderOpen, Folder, Terminal, Check } from 'lucide-react';
 import clsx from 'clsx';
 
 import { ContentNode } from '@/lib/content';
+import { useWatchedLessons } from './WatchedProvider';
 
 const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const pathname = usePathname();
+  const { watched } = useWatchedLessons();
 
   const href = `/${item.path.split('/').map(encodeURIComponent).join('/')}`;
   const isActive = pathname === href;
 
   // Auto-expand if a child is active
   useEffect(() => {
-    if (pathname.startsWith(href) && item.type === 'directory') {
-      setIsOpen(true);
-    }
+    if (!(pathname.startsWith(href) && item.type === 'directory')) return;
+    const timer = window.setTimeout(() => setIsOpen(true), 0);
+    return () => clearTimeout(timer);
   }, [pathname, href, item.type]);
 
   if (item.type === 'directory') {
@@ -44,7 +46,7 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
         >
           {isTopLevel ? (
             <>
-              <span style={{ color: 'var(--cyber-text-muted)' }}>//</span>
+              <span style={{ color: 'var(--cyber-text-muted)' }}>{'//'}</span>
               <span
                 className="font-mono font-semibold uppercase tracking-[0.15em] text-xs"
                 style={{ color: 'var(--cyber-cyan)', textShadow: isHovered ? 'var(--glow-text)' : 'none' }}
@@ -95,6 +97,7 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
   if (!item.name.endsWith('.md')) return null;
 
   const displayName = item.name.replace('.md', '');
+  const isWatched = watched[item.path];
 
   return (
     <Link
@@ -129,14 +132,25 @@ const SidebarItem = ({ item, level = 0 }: { item: ContentNode; level?: number })
         style={{ color: isActive ? 'var(--cyber-cyan)' : 'var(--cyber-text-muted)' }}
       />
       <span className="truncate font-mono text-xs">{displayName}</span>
-      {isActive && (
-        <span
-          className="ml-auto text-xs font-mono"
-          style={{ color: 'var(--cyber-cyan)', opacity: 0.6 }}
-        >
-          {'<'}
-        </span>
-      )}
+      <span className="ml-auto flex items-center gap-2">
+        {isWatched && (
+          <span
+            className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em]"
+            style={{ color: 'var(--cyber-teal)', textShadow: 'var(--glow-text)' }}
+          >
+            <Check size={12} />
+            done
+          </span>
+        )}
+        {isActive && (
+          <span
+            className="text-xs font-mono"
+            style={{ color: 'var(--cyber-cyan)', opacity: 0.6 }}
+          >
+            {'<'}
+          </span>
+        )}
+      </span>
     </Link>
   );
 };

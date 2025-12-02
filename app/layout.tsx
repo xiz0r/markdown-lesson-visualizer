@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 import { getDirectoryTree } from "@/lib/content";
 import Sidebar from "@/components/Sidebar";
+import { WatchedProvider } from "@/components/WatchedProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,22 +40,24 @@ export default function RootLayout({
           color: 'var(--cyber-text)'
         }}
       >
-        {/* Subtle grid overlay */}
-        <div
-          className="fixed inset-0 pointer-events-none opacity-[0.02]"
-          style={{
-            backgroundImage: `
-              linear-gradient(var(--cyber-cyan) 1px, transparent 1px),
-              linear-gradient(90deg, var(--cyber-cyan) 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
-          }}
-        />
+        <WatchedProvider>
+          {/* Subtle grid overlay */}
+          <div
+            className="fixed inset-0 pointer-events-none opacity-[0.02]"
+            style={{
+              backgroundImage: `
+                linear-gradient(var(--cyber-cyan) 1px, transparent 1px),
+                linear-gradient(90deg, var(--cyber-cyan) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+            }}
+          />
 
-        <Sidebar tree={tree} />
-        <main className="flex-1 overflow-y-auto h-full relative">
-          {children}
-        </main>
+          <Sidebar tree={tree} />
+          <main className="flex-1 overflow-y-auto h-full relative">
+            {children}
+          </main>
+        </WatchedProvider>
       </body>
     </html>
   );

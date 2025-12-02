@@ -8,13 +8,14 @@ export default function ContentWrapper({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   useEffect(() => {
-    // Reset animation on route change
-    setIsVisible(false);
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setIsVisible(true);
     }, 50);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setIsVisible(false);
+    };
   }, [pathname]);
 
   return (

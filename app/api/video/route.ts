@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
             file.on('data', (chunk) => {
                 try {
                     controller.enqueue(chunk);
-                } catch (e) {
+                } catch {
                     // Controller might be closed if client disconnected
                     file.destroy();
                 }
@@ -51,14 +51,14 @@ export async function GET(request: NextRequest) {
             file.on('end', () => {
                 try {
                     controller.close();
-                } catch (e) {
+                } catch {
                     // Ignore if already closed
                 }
             });
             file.on('error', (err) => {
                 try {
                     controller.error(err);
-                } catch (e) {
+                } catch {
                     // Ignore if already closed
                 }
             });
@@ -89,19 +89,19 @@ export async function GET(request: NextRequest) {
             file.on('data', (chunk) => {
                 try {
                     controller.enqueue(chunk);
-                } catch (e) {
+                } catch {
                     file.destroy();
                 }
             });
             file.on('end', () => {
                 try {
                     controller.close();
-                } catch (e) {}
+                } catch {}
             });
             file.on('error', (err) => {
                 try {
                     controller.error(err);
-                } catch (e) {}
+                } catch {}
             });
         },
         cancel() {
